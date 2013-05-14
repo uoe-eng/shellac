@@ -39,9 +39,9 @@ class Start(Cmd):
             return [x + ' ' for x in tree if x.startswith(tokens[0])]
         else:
             if tokens[0] in tree.keys():
-                try:
+                if callable(tree[tokens[0]]):
                     return [x + ' ' for x in tree[tokens[0]]() if x.startswith(tokens[-1])]
-                except TypeError:
+                else:
                     return cls.traverse(tokens[1:], tree[tokens[0]])
         return []
 
