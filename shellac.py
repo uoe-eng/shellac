@@ -28,7 +28,9 @@ class Start(Cmd):
 
     do_EOF = do_exit
 
-    def traverse(self, tokens, tree):
+    # traverse is recursive so needs to be able to find itself through the class.
+    @classmethod
+    def traverse(cls, tokens, tree):
         if tree is None:
             return []
         elif len(tokens) == 0:
@@ -40,9 +42,7 @@ class Start(Cmd):
                 try:
                     return [x + ' ' for x in tree[tokens[0]]() if x.startswith(tokens[-1])]
                 except TypeError:
-                    return self.traverse(tokens[1:], tree[tokens[0]])
-            else:
-                return []
+                    return cls.traverse(tokens[1:], tree[tokens[0]])
         return []
 
     def complete(self, text, state):
