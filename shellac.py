@@ -1,0 +1,66 @@
+#!/usr/bin/python
+
+from cmd import Cmd
+import sys
+import readline
+
+
+class Start(Cmd):
+
+    def greet():
+        return ["hello", "hi", "goodday"]
+
+    tree = {'alpha':
+                 {'bravo': greet,
+                  'charlie': None,
+                   },
+             'delta':
+                 {'echo': None,
+                  'foxtrot':
+                       {'golf': None,
+                        'hotel': None
+                        }
+                   }
+             }
+
+    def do_exit(self, args):
+        return True
+
+    do_EOF = do_exit
+
+    def traverse(self, tokens, tree):
+        if tree is None:
+            return []
+        elif len(tokens) == 0:
+            return tree.keys()
+        if len(tokens) == 1:
+            return [x + ' ' for x in tree if x.startswith(tokens[0])]
+        else:
+            if tokens[0] in tree.keys():
+                try:
+                    return [x + ' ' for x in tree[tokens[0]]() if x.startswith(tokens[-1])]
+                except TypeError:
+                    return self.traverse(tokens[1:], tree[tokens[0]])
+            else:
+                return []
+        return []
+
+    def complete(self, text, state):
+        try:
+            tokens = readline.get_line_buffer().split()
+            if not tokens or readline.get_line_buffer()[-1] == ' ':
+                tokens.append('')
+            results = self.traverse(tokens, self.tree) + [None]
+            return results[state]
+        except Exception, e:
+            print e
+
+    def default(self, line):
+        # TODO: For testing only - replace with proper methods
+        print repr(line)
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        Start().onecmd(' '.join(sys.argv[1:]))
+    else:
+        Start().cmdloop()
