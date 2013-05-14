@@ -46,14 +46,15 @@ class Start(Cmd):
         return []
 
     def complete(self, text, state):
-        try:
+        if state == 0:
             tokens = readline.get_line_buffer().split()
             if not tokens or readline.get_line_buffer()[-1] == ' ':
                 tokens.append('')
-            results = self.traverse(tokens, self.tree) + [None]
-            return results[state]
-        except Exception, e:
-            print e
+            self.results = self.traverse(tokens, self.tree)
+        try:
+            return self.results[state]
+        except IndexError:
+            return None
 
     def default(self, line):
         # TODO: For testing only - replace with proper methods
