@@ -3,46 +3,58 @@
 from cmd import Cmd
 import sys
 import readline
+import inspect
 
 
 class Start(Cmd):
 
-    def greet():
-        return ["hello", "hi", "goodday"]
+    class do_alpha():
+        completions = [
+            lambda x: [y + ' ' for y in ['right', 'wrong'] if y.startswith(x)]]
 
-    tree = {'alpha':
-                 {'bravo': greet,
-                  'charlie': None,
-                   },
-             'delta':
-                 {'echo': None,
-                  'foxtrot':
-                       {'golf': None,
-                        'hotel': None
-                        }
-                   }
-             }
+        class do_bravo():
+
+            class do_charlie():
+                def do_run():
+                    print "charlie run"
+
+    class do_delta():
+        def do_run():
+            print "delta run"
 
     def do_exit(self, args):
         return True
 
     do_EOF = do_exit
 
-    # traverse is recursive so needs to be able to find itself through the class.
+    @staticmethod
+    def members(obj):
+        for f in inspect.getmembers(obj):
+            if f[0].startswith('do_'):
+                yield f[0][3:]
+
+    @classmethod
+    def complete_children(cls, obj, token):
+        for x in cls.members(obj):
+            if x.startswith(token):
+                yield x + ' '
+
+    # traverse is recursive so needs to find itself through the class
     @classmethod
     def traverse(cls, tokens, tree):
         if tree is None:
             return []
         elif len(tokens) == 0:
-            return tree.keys()
+            return cls.members(tree)
         if len(tokens) == 1:
-            return [x + ' ' for x in tree if x.startswith(tokens[0])]
-        else:
-            if tokens[0] in tree.keys():
-                if callable(tree[tokens[0]]):
-                    return [x + ' ' for x in tree[tokens[0]]() if x.startswith(tokens[-1])]
-                else:
-                    return cls.traverse(tokens[1:], tree[tokens[0]])
+            if hasattr(tree, 'completions'):
+                complist = []
+                for f in getattr(tree, 'completions'):
+                    complist.extend(f(tokens[0]))
+                return complist
+            return cls.complete_children(tree, tokens[0])
+        elif tokens[0] in cls.members(tree):
+            return cls.traverse(tokens[1:], getattr(tree, 'do_' + tokens[0]))
         return []
 
     def complete(self, text, state):
@@ -50,7 +62,7 @@ class Start(Cmd):
             tokens = readline.get_line_buffer().split()
             if not tokens or readline.get_line_buffer()[-1] == ' ':
                 tokens.append('')
-            self.results = self.traverse(tokens, self.tree)
+            self.results = list(self.traverse(tokens, self))
         try:
             return self.results[state]
         except IndexError:
