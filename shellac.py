@@ -14,11 +14,13 @@ def complete_charlie_two(token):
     return [x + ' ' for x in ['cat', 'dog'] if x.startswith(token)]
 
 
-def completer(obj, func):
-    if not hasattr(obj, "completions"):
-        obj.completions = []
-    obj.completions.append(func)
-    return obj
+def completer(func):
+    def innerCompleter(obj):
+        if not hasattr(obj, "completions"):
+            obj.completions = []
+        obj.completions.append(func)
+        return obj
+    return innerCompleter
 
 
 class Start(Cmd):
@@ -27,10 +29,10 @@ class Start(Cmd):
 
         class do_bravo():
 
+            @completer(complete_charlie_one)
+            @completer(complete_charlie_two)
             def do_charlie():
-                    pass
-            do_charlie = completer(do_charlie, complete_charlie_one)
-            do_charlie = completer(do_charlie, complete_charlie_two)
+                pass
 
     class do_delta():
         completions = [
