@@ -6,19 +6,36 @@ import readline
 import inspect
 
 
+def complete_charlie_one(token):
+    return [x + ' ' for x in ['ant', 'bee'] if x.startswith(token)]
+
+
+def complete_charlie_two(token):
+    return [x + ' ' for x in ['cat', 'dog'] if x.startswith(token)]
+
+
+def completer(obj, func):
+    if not hasattr(obj, "completions"):
+        obj.completions = []
+    obj.completions.append(func)
+    return obj
+
+
 class Start(Cmd):
 
     class do_alpha():
-        completions = [
-            lambda x: [y + ' ' for y in ['right', 'wrong'] if y.startswith(x)]]
 
         class do_bravo():
 
-            class do_charlie():
-                def do_run():
-                    print "charlie run"
+            def do_charlie():
+                    pass
+            do_charlie = completer(do_charlie, complete_charlie_one)
+            do_charlie = completer(do_charlie, complete_charlie_two)
 
     class do_delta():
+        completions = [
+            lambda x: [y + ' ' for y in ['right', 'wrong'] if y.startswith(x)]]
+
         def do_run():
             print "delta run"
 
