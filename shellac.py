@@ -48,8 +48,10 @@ class Shellac(Cmd):
 
     def complete(self, text, state):
         if state == 0:
-            tokens = readline.get_line_buffer().split()
-            if not tokens or readline.get_line_buffer()[-1] == ' ':
+            endidx = readline.get_endidx()
+            buf = readline.get_line_buffer()
+            tokens = buf[:endidx].split()
+            if not tokens or buf[endidx-1] == ' ':
                 tokens.append('')
             self.results = list(self.traverse(tokens, self))
         try:
