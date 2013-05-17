@@ -38,7 +38,7 @@ class Shellac(Cmd):
         elif not line:
             return self.emptyline()
         self.lastcmd = line
-        if line == 'EOF' :  # http://bugs.python.org/issue13500
+        if line == 'EOF':  # http://bugs.python.org/issue13500
             self.lastcmd = ''
         try:
             root = getattr(root, 'do_' + child)
