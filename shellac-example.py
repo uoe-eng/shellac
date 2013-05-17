@@ -19,15 +19,15 @@ class myShellac(shellac.Shellac):
 
             @shellac.completer(complete_charlie_one)
             @shellac.completer(complete_charlie_two)
-            def do_charlie():
-                pass
+            def do_charlie(self, args):
+                print("Charlie says " + ' '.join(args))
 
     class do_delta():
         completions = [
             lambda x: [y + ' ' for y in ['right', 'wrong'] if y.startswith(x)]]
 
-        def do_run():
-            print "delta run"
+        def do_run(self, args):
+            print("delta ran")
 
     def do_exit(self, args):
         return True

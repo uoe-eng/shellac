@@ -28,6 +28,35 @@ def complete_list(l, token):
 
 class Shellac(Cmd):
 
+    # onecmd is recursive so needs to find itself through the class
+    @classmethod
+    def onecmd(cls, line, pos=0, root=None):
+        if line:
+            tokens = line.split()
+            try:
+                child, args = tokens[pos], tokens[pos + 1:]
+            except IndexError:
+                # We fell off the end with no callable functions
+                print("Nothing to do!")
+                return
+        else:
+            return
+        if not root:
+            root = cls
+        try:
+            root = getattr(root, 'do_' + child)
+        except AttributeError as e:
+            print(e)
+        if inspect.isclass(root):
+            # If a class, we must instantiate it
+            root = root()
+        try:
+            # Is root (really) callable
+            return root(args)
+        except AttributeError:
+            # It wasn't callable, recurse
+            return cls.onecmd(line, pos + 1, root)
+
     # traverse is recursive so needs to find itself through the class
     @classmethod
     def traverse(cls, tokens, tree):
@@ -51,7 +80,7 @@ class Shellac(Cmd):
             endidx = readline.get_endidx()
             buf = readline.get_line_buffer()
             tokens = buf[:endidx].split()
-            if not tokens or buf[endidx-1] == ' ':
+            if not tokens or buf[endidx - 1] == ' ':
                 tokens.append('')
             self.results = list(self.traverse(tokens, self))
         try:
