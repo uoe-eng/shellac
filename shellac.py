@@ -15,15 +15,15 @@ def completer(func):
 
 
 def members(obj):
-        for f in inspect.getmembers(obj):
-            if f[0].startswith('do_'):
-                yield f[0][3:]
+    for f in inspect.getmembers(obj):
+        if f[0].startswith('do_'):
+            yield f[0][3:]
 
 
 def complete_list(l, token):
-        for x in l:
-            if x.startswith(token):
-                yield x + ' '
+    for x in l:
+        if x.startswith(token):
+            yield x + ' '
 
 
 class Shellac(Cmd):
