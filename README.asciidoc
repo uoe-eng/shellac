@@ -11,7 +11,8 @@ In +cmd+, the command-line entered is assumed to be a single +command+ followed 
 
 With +shellac+
 
-+(Cmd) alpha bravo charlie+
+[source, shell]
+(Cmd) alpha bravo charlie
 
 Could be configured to be any of:
 
@@ -23,6 +24,9 @@ Could be configured to be any of:
 
 Using +shellac+
 ---------------
+
+TIP: Since shellac is derived from +cmd+ you can override many of the public instance variables such as +prompt+, +intro+ etc.  You probably also want to consider overriding the +emptyline+ method.  See http://docs.python.org/3/library/cmd.html#cmd.Cmd.prompt[cmd] for details.
+
 
 Simple Commands
 ~~~~~~~~~~~~~~~
@@ -94,11 +98,12 @@ class myShellac(shellac.Shellac):
         pass
 --------------------------------------------------------------
 
-Now if you run:
+Now run it:
 
-+(Cmd) user add foo+
+[source, shell]
+(Cmd) user add foo
+Added user foo+
 
-You should see: +Added user foo+
 
 Extended Completions
 ~~~~~~~~~~~~~~~~~~~~
@@ -136,15 +141,17 @@ In the comment you can see the use of the +complete_list+ helper function from s
 
 --------------------------------------------------------------
 
-Now if we run the code and type:
+Now if we run it we can see it completing from the list_users function:
 
-+user remove <Tab>+
+[source]
+--------------------------------------------------------------
+(Cmd) user remove <Tab>
+alice bob clive
 
-it will complete from the list returned by +list_users+.  Due to the +complete_list+ function:
+(Cmd) user remove a<Tab>
+alice
 
-+user remove a<Tab>+
-
-would just return: +alice+.
+--------------------------------------------------------------
 
 
 Corner Cases
