@@ -2,9 +2,9 @@ shellac
 -------
 :language: python
 
-+shellac+ is an extension of the standard python library http://docs.python.org/3/library/cmd.html[cmd], which aims to offer an alternative approach to nesting commands to that currently offered by +cmd+
++shellac+ is an extension of the standard python library http://docs.python.org/2/library/cmd.html[cmd], which aims to offer an alternative approach to nesting commands to that currently offered by +cmd+.
 
-In +cmd+, the command-line entered is assumed to be a single +command+ followed by a string containing +arguments+ to that command.  This makes it difficult to call strings of nested commands without using operating in a modal manner, where each command is its own class inheriting from Cmd.
+In +cmd+, the command-line entered is assumed to be a single +command+ followed by a string containing +arguments+ to that command.  This makes it difficult to call strings of nested commands without operating in a modal manner, where each command is its own class inheriting from +Cmd+.
 
 +shellac+ is different.  It supports nested commands by evaluating for you whether the items provided on the command-line are commands, sub-commands or arguments.  It allows you to flexibly build a hierarchy to your own specification, without needing to have a complex understanding of the innards of either +shellac+ or +cmd+.
 
@@ -13,7 +13,7 @@ With +shellac+
 [source, shell]
 (Cmd) alpha bravo charlie
 
-Could be configured to be any of:
+could be configured to be any of:
 
 * Command: +alpha+, Arguments: +bravo charlie+
 * Command: +alpha bravo+, Arguments: +charlie+
@@ -24,7 +24,7 @@ Could be configured to be any of:
 Using +shellac+
 ~~~~~~~~~~~~~~~
 
-TIP: Since shellac is derived from +cmd+ you can override many of the public instance variables such as +prompt+, +intro+ etc.  You probably also want to consider overriding the +emptyline+ method.  See http://docs.python.org/3/library/cmd.html#cmd.Cmd.prompt[cmd] for details.
+TIP: Since shellac is derived from +cmd+ you can override many of the public instance variables such as +prompt+, +intro+ etc.  You probably also want to consider overriding the +emptyline+ method.  See http://docs.python.org/2/library/cmd.html#cmd.Cmd.prompt[cmd] for details.
 
 
 Simple Commands
@@ -39,7 +39,7 @@ This will give you access to the main +shellac.Shellac+ class, which you will ne
 
 You can now construct the nested hierarchy which contains the commands and sub-commands for your program.  These must begin with +do_+ (to be distinguished from other non-hierarchy objects in your class).
 
-If you wish to create a commands in your hierarchy that will contain other commands, it should be created as a +class+.  For commands which will actually do something, it is best to create +methods+ (or classes with a +__call__+ method defined).  It is not possible to have a command that both runs (with arguments) and also has nested sub-commands.
+If you wish to create a commands in your hierarchy that will contain other commands, it should be created as a +class+.  For commands which will actually do something, it is best to create +methods+ (or classes with a +\__call__+ method defined).  It is not possible to have a command that both runs (with arguments) and also has nested sub-commands.
 
 Callable commands will be passed +args+ which contains all text following them on the command-line.
 
@@ -101,7 +101,7 @@ Now run it:
 
 [source, shell]
 (Cmd) user add foo
-Added user foo+
+Added user foo
 
 
 Extended Completions
