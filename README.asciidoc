@@ -39,7 +39,7 @@ This will give you access to the main +shellac.Shellac+ class, which you will ne
 
 You can now construct the nested hierarchy which contains the commands and sub-commands for your program.  These must begin with +do_+ (to be distinguished from other non-hierarchy objects in your class).
 
-If you wish to create a commands in your hierarchy that will contain other commands, it should be created as a +class+.  For commands which will actually do something, it is best to create +methods+ (or classes with a +\__call__+ method defined).  It is not possible to have a command that both runs (with arguments) and also has nested sub-commands.
+If you wish to create a command in your hierarchy that will contain other commands, it should be created as a +class+.  For commands which will actually do something, it is best to create +methods+ (or classes with a +\__call__+ method defined).  It is not possible to have a command that both runs (with arguments) and also has nested sub-commands.
 
 Callable commands will be passed +args+ which contains all text following them on the command-line.
 
@@ -115,17 +115,29 @@ In this example, for the +remove+ function, we want to tab-complete from the lis
 --------------------------------------------------------------
 
 def list_users(token):
-    return ['alice', 'bob', clive']
+    return [x + ' ' for x in ['alice', 'bob', clive'] if x.startswith(token)]
 
-#   return shellac.complete_list(['alice', 'bob', 'clive'], token)
+
 
 --------------------------------------------------------------
 
 We'll put this at the top of our example code, but it could of course be imported from another module.
 
-In the comment you can see the use of the +complete_list+ helper function from shellac.  This provides some quick short-hand to wrap a list and only return items from it which start with the +token+ (that you are tab-completing on).  Of course, if your +list_users+ module was capable of filtering the results it returned, you could use +token+ to filter and only return an appropriate list.
+It is up to your function to handle tab-completion appropriately, as in this example.  In many cases you will be making a call to a command, service or protocol which can filter for you (+ls+, +ldap+, +SQL+ etc).
 
-+shellac+ offers a +@completer+ decorator to specify external function(s) which should be called to complete for a particular method.  You can specify as many of these as you like, and the lists returned by each function called will be joined together before being presented as complete options.
+However for other cases, shellac offers a function +complete_list+.  This provides some quick short-hand to wrap a list and handle tab-completion:
+
+
+[source]
+--------------------------------------------------------------
+
+ def list_users(token)
+ return shellac.complete_list(['alice', 'bob', 'clive'], token)
+
+--------------------------------------------------------------
+
+
++shellac+ offers a +@completer+ decorator to specify external function(s) which should be called to complete for a particular part of the hierarchy.  You can specify as many of these as you like, and the lists returned by each function called will be joined together before being presented as complete options.
 
 [source]
 --------------------------------------------------------------
