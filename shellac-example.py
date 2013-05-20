@@ -20,7 +20,7 @@ class myShellac(shellac.Shellac):
             @shellac.completer(complete_charlie_one)
             @shellac.completer(complete_charlie_two)
             def do_charlie(self, args):
-                print("Charlie says " + args)
+                print(("Charlie says " + args))
 
     class do_delta():
         completions = [

@@ -55,7 +55,8 @@ class Shellac(Cmd):
         try:
             # Is root (really) callable
             return root(args)
-        except AttributeError:
+        # python2 and 3 return different exceptions here
+        except (AttributeError, TypeError):
             # It wasn't callable, recurse
             if not args:
                 return self.default(line)
