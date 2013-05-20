@@ -28,6 +28,11 @@ def complete_list(l, token):
 
 class Shellac(Cmd):
 
+    def do_exit(self, args):
+        return True
+
+    do_EOF = do_exit
+
     def onecmd(self, line, args='', root=None):
         if not args:
             args = line

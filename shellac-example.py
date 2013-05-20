@@ -29,11 +29,6 @@ class myShellac(shellac.Shellac):
         def do_run(self, args):
             print("delta ran")
 
-    def do_exit(self, args):
-        return True
-
-    do_EOF = do_exit
-
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
