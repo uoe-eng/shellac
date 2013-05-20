@@ -1,6 +1,5 @@
 shellac
-=======
-:doctype: article
+-------
 :language: python
 
 +shellac+ is an extension of the standard python library http://docs.python.org/3/library/cmd.html[cmd], which aims to offer an alternative approach to nesting commands to that currently offered by +cmd+
@@ -23,13 +22,13 @@ Could be configured to be any of:
 +shellac+ supports full tab-completion, by default returning all the sub-commands of the 'current' command.  However it also extends this to allow tab-completion based on your own functions.  This allows you to tab-complete from queries to data sources, command-line tools or other python data structures simply by specifying a function which will perform this query and return a list of possible completions.
 
 Using +shellac+
----------------
+~~~~~~~~~~~~~~~
 
 TIP: Since shellac is derived from +cmd+ you can override many of the public instance variables such as +prompt+, +intro+ etc.  You probably also want to consider overriding the +emptyline+ method.  See http://docs.python.org/3/library/cmd.html#cmd.Cmd.prompt[cmd] for details.
 
 
 Simple Commands
-~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^
 
 You should begin by importing the module:
 
@@ -78,7 +77,7 @@ The extra code at the end will look for any arguments passed to the script when 
 
 
 Sub-Commands
-~~~~~~~~~~~~
+^^^^^^^^^^^^
 
 Now we want to add some sub-commands to our do_user class:
 
@@ -106,7 +105,7 @@ Added user foo+
 
 
 Extended Completions
-~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^
 
 Up until now, completion has simply shown a list of all sub-commands (nested classes/methods) of the current command.
 
@@ -155,7 +154,7 @@ alice
 
 
 Corner Cases
-~~~~~~~~~~~~
+^^^^^^^^^^^^
 
 It is important to note that although you are handed back a list of completions, you can opt to type any text, and this will be used as commands or arguments, which may or may not be valid.
 
@@ -229,7 +228,7 @@ An awkward situation averted!
 While this (mis)use might appear to be quite confusing to anyone actually running this particular code, it does allow flexibility: both accepting arguments other than those suggested by the completion function; and having 'hidden' commands which aren't suggested by the completion function.
 
 Addendum
-~~~~~~~~
+^^^^^^^^
 
 For the sake of clarity/completeness, if you wanted to be able to use both +compliments+ and +insults+ functions, then you'd just discard one level of the whole hierarchy and apply two decorators:
 
