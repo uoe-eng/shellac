@@ -33,6 +33,30 @@ class Shellac(Cmd):
 
     do_EOF = do_exit
 
+    def do_help(self, args):
+        if args:
+            root = self
+            items = args.split(' ')
+            for item in items:
+                try:
+                    root = getattr(root, 'do_' + item)
+                except AttributeError:
+                    print "*** Syntax Error: No command", item
+                    break
+                # FIX: Corner cases where item is not a unique string in args?
+                if items[-1] == item:
+                    help_string = None
+                    try:
+                        help_string = getattr(root, '__doc__')
+                    except AttributeError:
+                        pass
+                    if help_string is None:
+                        print "*** no help on", item
+                    else:
+                        print "Help for %s: %s" % (item, help_string)
+        else:
+            print "Help's help"
+
     def onecmd(self, line, args='', root=None):
         if not args:
             args = line
