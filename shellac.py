@@ -38,11 +38,12 @@ class Shellac(Cmd):
             root = self
             items = args.split(' ')
             for item in items:
-                try:
-                    root = getattr(root, 'do_' + item)
-                except AttributeError:
-                    print "*** Syntax Error: No command", item
-                    break
+                if not item.isspace():
+                    try:
+                        root = getattr(root, 'do_' + item)
+                    except AttributeError:
+                        print "*** Syntax Error: No command", item
+                        break
                 # FIX: Corner cases where item is not a unique string in args?
                 if items[-1] == item:
                     help_string = None
@@ -86,9 +87,26 @@ class Shellac(Cmd):
                 return self.default(line)
             return self.onecmd(line, args, root)
 
-    # traverse is recursive so needs to find itself through the class
+    # traverse_help is recursive so needs to find itself through the class
     @classmethod
-    def traverse(cls, tokens, tree):
+    def traverse_help(cls, tokens, tree):
+        # Strip 'help' off the tokens list
+        if tokens[0] == "help":
+            tokens = tokens[1:]
+        if tree is None:
+            return []
+        elif len(tokens) == 0:
+            return members(tree)
+        if len(tokens) == 1:
+            return complete_list(members(tree), tokens[0])
+        elif tokens[0] in members(tree):
+            return cls.traverse_help(tokens[1:],
+                                     getattr(tree, 'do_' + tokens[0]))
+        return []
+
+    # traverse_do is recursive so needs to find itself through the class
+    @classmethod
+    def traverse_do(cls, tokens, tree):
         if tree is None:
             return []
         elif len(tokens) == 0:
@@ -101,7 +119,8 @@ class Shellac(Cmd):
                 return complist
             return complete_list(members(tree), tokens[0])
         elif tokens[0] in members(tree):
-            return cls.traverse(tokens[1:], getattr(tree, 'do_' + tokens[0]))
+            return cls.traverse_do(tokens[1:],
+                                   getattr(tree, 'do_' + tokens[0]))
         return []
 
     def complete(self, text, state):
@@ -111,7 +130,11 @@ class Shellac(Cmd):
             tokens = buf[:endidx].split()
             if not tokens or buf[endidx - 1] == ' ':
                 tokens.append('')
-            self.results = list(self.traverse(tokens, self))
+            cmd = tokens[0]
+            if cmd == "help":
+                self.results = list(self.traverse_help(tokens, self))
+            else:
+                self.results = list(self.traverse_do(tokens, self))
         try:
             return self.results[state]
         except IndexError:
