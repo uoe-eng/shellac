@@ -33,30 +33,41 @@ class Shellac(Cmd):
 
     do_EOF = do_exit
 
-    def do_help(self, args):
-        if args:
+    def do_help(self, args, root=None):
+        help_msg = None
+        if root is None:
+            if len(args) == 0:
+                print "Help:", self.help_help()
+                return
             root = self
-            items = args.split(' ')
-            for item in items:
-                if not item.isspace():
-                    try:
-                        root = getattr(root, 'do_' + item)
-                    except AttributeError:
-                        print "*** Syntax Error: No command", item
-                        break
-                # FIX: Corner cases where item is not a unique string in args?
-                if items[-1] == item:
-                    help_string = None
-                    try:
-                        help_string = getattr(root, '__doc__')
-                    except AttributeError:
-                        pass
-                    if help_string is None:
-                        print "*** no help on", item
-                    else:
-                        print "Help for %s: %s" % (item, help_string)
+        if inspect.isclass(root):
+            # If a class, we must instantiate it
+            root = root()
+        cmd, _, args = args.partition(' ')
+        try:
+            # Must query potential help_ before changing root
+            help_msg = getattr(root, 'help_' + cmd)()
+        except AttributeError:  # No help_ section
+            pass
+        try:
+            root = getattr(root, 'do_' + cmd)
+        except AttributeError:  # No cmd of that name
+            print "*** Syntax Error: No command", cmd
+            return
+        if len(args) == 0:
+            if help_msg is None:
+                try:
+                    help_msg = getattr(root, '__doc__')
+                except AttributeError:  # No docstring
+                    print "No help for", cmd
+                    return
+            print "Help (%s): %s" % (cmd, help_msg)
+            return
         else:
-            print "Help's help"
+            return self.do_help(args, root)
+
+    def help_help(self):
+        return "Help about the help system"
 
     def onecmd(self, line, args='', root=None):
         if not args:
