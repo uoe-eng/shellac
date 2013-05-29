@@ -36,18 +36,18 @@ class Shellac(Cmd):
 
     def do_help(self, args):
         """Help system documentation!"""
-        print(self.get_help(args, self) or
+        print(self._get_help(args, self) or
               "*** No help for %s" % (args or repr(self)))
 
     @classmethod
-    def get_help(cls, args, root):
+    def _get_help(cls, args, root):
         cmd, _, args = args.partition(' ')
         if not cmd:
             return root.__doc__
         if inspect.isclass(root):
             root = root()
         if hasattr(root, 'do_' + cmd):
-            res = cls.get_help(args, getattr(root, 'do_' + cmd))
+            res = cls._get_help(args, getattr(root, 'do_' + cmd))
             if res:
                 return res
         try:
@@ -90,7 +90,7 @@ class Shellac(Cmd):
 
     # traverse_help is recursive so needs to find itself through the class
     @classmethod
-    def traverse_help(cls, tokens, tree):
+    def _traverse_help(cls, tokens, tree):
         if tree is None:
             return []
         elif len(tokens) == 0:
@@ -98,13 +98,13 @@ class Shellac(Cmd):
         if len(tokens) == 1:
             return complete_list(members(tree), tokens[0])
         elif tokens[0] in members(tree):
-            return cls.traverse_help(tokens[1:],
+            return cls._traverse_help(tokens[1:],
                                      getattr(tree, 'do_' + tokens[0]))
         return []
 
     # traverse_do is recursive so needs to find itself through the class
     @classmethod
-    def traverse_do(cls, tokens, tree):
+    def _traverse_do(cls, tokens, tree):
         if tree is None:
             return []
         elif len(tokens) == 0:
@@ -117,7 +117,7 @@ class Shellac(Cmd):
                 return complist
             return complete_list(members(tree), tokens[0])
         elif tokens[0] in members(tree):
-            return cls.traverse_do(tokens[1:],
+            return cls._traverse_do(tokens[1:],
                                    getattr(tree, 'do_' + tokens[0]))
         return []
 
@@ -129,9 +129,9 @@ class Shellac(Cmd):
             if not tokens or buf[endidx - 1] == ' ':
                 tokens.append('')
             if tokens[0] == "help":
-                self.results = list(self.traverse_help(tokens[1:], self))
+                self.results = list(self._traverse_help(tokens[1:], self))
             else:
-                self.results = list(self.traverse_do(tokens, self))
+                self.results = list(self._traverse_do(tokens, self))
         try:
             return self.results[state]
         except IndexError:
