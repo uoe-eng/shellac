@@ -12,9 +12,13 @@ def complete_charlie_two(token):
 
 
 class myShellac(shellac.Shellac):
+    """Documentation about myShellac"""
 
     def help_alpha(self, args):
         return "help_alpha " + args
+
+    def help_banana(self, args):
+        return "Platano"
 
     class do_alpha():
         """alpha docstring"""
