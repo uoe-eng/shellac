@@ -42,33 +42,22 @@ class Shellac(Cmd):
     @classmethod
     def get_help(cls, args, root):
         cmd, _, args = args.partition(' ')
+        if not cmd:
+            return root.__doc__
         if inspect.isclass(root):
             root = root()
         if hasattr(root, 'do_' + cmd):
-            if len(args) == 0:
-                try:
-                    return getattr(root, 'help_' + cmd)(args)
-                except AttributeError:
-                    string = getattr(root, 'do_' + cmd).__doc__
-                    if string is None:
-                        return
-                    return string
-            else:
-                res = cls.get_help(args, getattr(root, 'do_' + cmd))
-                if res is not None:
-                    return res
-        else:
-            return
+            res = cls.get_help(args, getattr(root, 'do_' + cmd))
+            if res:
+                return res
         try:
-            return getattr(root, 'help_' + cmd)(args)
+            func = getattr(root, 'help_' + cmd)
         except AttributeError:
-                string = getattr(root, 'do_' + cmd).__doc__
-                if string is None:
-                    return
-                return string
-
-    def help_help(self, args=None):
-        return "Help about the help system"
+            if hasattr(root, 'do_' + cmd):
+                return getattr(root, 'do_' + cmd).__doc__
+            return None
+        else:
+            return func(args)
 
     def onecmd(self, line, args='', root=None):
         if not args:
