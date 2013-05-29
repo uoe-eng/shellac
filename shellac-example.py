@@ -13,16 +13,16 @@ def complete_charlie_two(token):
 
 class myShellac(shellac.Shellac):
 
-    def help_alpha(self):
-        return "help_alpha"
+    def help_alpha(self, args):
+        return "help_alpha " + args
 
     class do_alpha():
         """alpha docstring"""
         class do_bravo():
             """bravo docstring"""
 
-            def help_charlie(self):
-                return "help_charlie"
+            def help_charlie(self, args):
+                return "help_charlie " + args
 
             @shellac.completer(complete_charlie_one)
             @shellac.completer(complete_charlie_two)
@@ -35,14 +35,17 @@ class myShellac(shellac.Shellac):
         completions = [
             lambda x: [y + ' ' for y in ['right', 'wrong'] if y.startswith(x)]]
 
-        def help_run(self):
-            return "help_run"
+        def help_run(self, args):
+            return "help_run " + args
 
         def do_run(self, args):
             """run docstring"""
 
             print("delta ran")
 
+        def do_stop(self, args):
+
+            print("delta stop")
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:

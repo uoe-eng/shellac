@@ -33,40 +33,45 @@ class Shellac(Cmd):
 
     do_EOF = do_exit
 
-    def do_help(self, args, root=None):
-        help_msg = None
-        if root is None:
-            if len(args) == 0:
-                print "Help:", self.help_help()
-                return
-            root = self
-        if inspect.isclass(root):
-            # If a class, we must instantiate it
-            root = root()
-        cmd, _, args = args.partition(' ')
-        try:
-            # Must query potential help_ before changing root
-            help_msg = getattr(root, 'help_' + cmd)()
-        except AttributeError:  # No help_ section
-            pass
-        try:
-            root = getattr(root, 'do_' + cmd)
-        except AttributeError:  # No cmd of that name
-            print "*** Syntax Error: No command", cmd
-            return
+    def do_help(self, args):
         if len(args) == 0:
-            if help_msg is None:
-                try:
-                    help_msg = getattr(root, '__doc__')
-                except AttributeError:  # No docstring
-                    print "No help for", cmd
-                    return
-            print "Help (%s): %s" % (cmd, help_msg)
-            return
+            print "Help:", self.help_help()
         else:
-            return self.do_help(args, root)
+            res = self.get_help(args, self)
+            if res is None:
+                print "*** No help for: " + args
+            else:
+                print res
 
-    def help_help(self):
+    @classmethod
+    def get_help(cls, args, root):
+        cmd, _, args = args.partition(' ')
+        if inspect.isclass(root):
+            root = root()
+        if hasattr(root, 'do_' + cmd):
+            if len(args) == 0:
+                try:
+                    return getattr(root, 'help_' + cmd)(args)
+                except AttributeError:
+                    string = getattr(root, 'do_' + cmd).__doc__
+                    if string is None:
+                        return
+                    return string
+            else:
+                res = cls.get_help(args, getattr(root, 'do_' + cmd))
+                if res is not None:
+                    return res
+        else:
+            return
+        try:
+            return getattr(root, 'help_' + cmd)(args)
+        except AttributeError:
+                string = getattr(root, 'do_' + cmd).__doc__
+                if string is None:
+                    return
+                return string
+
+    def help_help(self, args=None):
         return "Help about the help system"
 
     def onecmd(self, line, args='', root=None):
