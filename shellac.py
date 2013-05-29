@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+from __future__ import print_function
 from cmd import Cmd
 import readline
 import inspect
@@ -34,14 +35,9 @@ class Shellac(Cmd):
     do_EOF = do_exit
 
     def do_help(self, args):
-        if len(args) == 0:
-            print "Help:", self.help_help()
-        else:
-            res = self.get_help(args, self)
-            if res is None:
-                print "*** No help for: " + args
-            else:
-                print res
+        """Help system documentation!"""
+        print(self.get_help(args, self) or
+              "*** No help for %s" % (args or repr(self)))
 
     @classmethod
     def get_help(cls, args, root):
