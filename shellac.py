@@ -102,9 +102,6 @@ class Shellac(Cmd):
     # traverse_help is recursive so needs to find itself through the class
     @classmethod
     def traverse_help(cls, tokens, tree):
-        # Strip 'help' off the tokens list
-        if tokens[0] == "help":
-            tokens = tokens[1:]
         if tree is None:
             return []
         elif len(tokens) == 0:
@@ -142,9 +139,8 @@ class Shellac(Cmd):
             tokens = buf[:endidx].split()
             if not tokens or buf[endidx - 1] == ' ':
                 tokens.append('')
-            cmd = tokens[0]
-            if cmd == "help":
-                self.results = list(self.traverse_help(tokens, self))
+            if tokens[0] == "help":
+                self.results = list(self.traverse_help(tokens[1:], self))
             else:
                 self.results = list(self.traverse_do(tokens, self))
         try:
