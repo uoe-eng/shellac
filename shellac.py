@@ -4,27 +4,37 @@ from __future__ import print_function
 from cmd import Cmd
 import readline
 import inspect
+from functools import wraps
+
+
+def generator(func):
+    @wraps(func)
+    def new_func(self, text, state):
+        if state == 0:
+            self.iterable = iter(func(self, text))
+        try:
+            return self.iterable.next()
+        except StopIteration:
+            self.iterable = None
+            return None
+    return new_func
 
 
 def completer(func):
-    def innerCompleter(obj):
+    def inner_completer(obj):
         if not hasattr(obj, "completions"):
             obj.completions = []
         obj.completions.append(func)
         return obj
-    return innerCompleter
+    return inner_completer
 
 
 def members(obj):
-    for f in inspect.getmembers(obj):
-        if f[0].startswith('do_'):
-            yield f[0][3:]
+    return (f[0][3:] for f in inspect.getmembers(obj) if f[0].startswith('do_'))
 
 
-def complete_list(l, token):
-    for x in l:
-        if x.startswith(token):
-            yield x + ' '
+def complete_list(names, token):
+    return (x + ' ' for x in names if x.startswith(token))
 
 
 class Shellac(Cmd):
@@ -99,7 +109,7 @@ class Shellac(Cmd):
             return complete_list(members(tree), tokens[0])
         elif tokens[0] in members(tree):
             return cls._traverse_help(tokens[1:],
-                                     getattr(tree, 'do_' + tokens[0]))
+                                      getattr(tree, 'do_' + tokens[0]))
         return []
 
     # traverse_do is recursive so needs to find itself through the class
@@ -111,28 +121,21 @@ class Shellac(Cmd):
             return members(tree)
         if len(tokens) == 1:
             if hasattr(tree, 'completions'):
-                complist = []
-                for f in getattr(tree, 'completions'):
-                    complist.extend(f(tokens[0]))
-                return complist
+                return (c for f in tree.completions for c in f(tokens[0]))
             return complete_list(members(tree), tokens[0])
         elif tokens[0] in members(tree):
             return cls._traverse_do(tokens[1:],
-                                   getattr(tree, 'do_' + tokens[0]))
+                                    getattr(tree, 'do_' + tokens[0]))
         return []
 
-    def complete(self, text, state):
-        if state == 0:
-            endidx = readline.get_endidx()
-            buf = readline.get_line_buffer()
-            tokens = buf[:endidx].split()
-            if not tokens or buf[endidx - 1] == ' ':
-                tokens.append('')
-            if tokens[0] == "help":
-                self.results = list(self._traverse_help(tokens[1:], self))
-            else:
-                self.results = list(self._traverse_do(tokens, self))
-        try:
-            return self.results[state]
-        except IndexError:
-            return None
+    @generator
+    def complete(self, text):
+        endidx = readline.get_endidx()
+        buf = readline.get_line_buffer()
+        tokens = buf[:endidx].split()
+        if not tokens or buf[endidx - 1] == ' ':
+            tokens.append('')
+        if tokens[0] == "help":
+            return self._traverse_help(tokens[1:], self)
+        else:
+            return self._traverse_do(tokens, self)
