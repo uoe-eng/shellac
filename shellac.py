@@ -37,7 +37,11 @@ def complete_list(names, token):
     return (x + ' ' for x in names if x.startswith(token))
 
 
-class Shellac(Cmd):
+class Shellac(Cmd, object):
+
+    def __init__(self):
+        super(Shellac, self).__init__()
+        self.prompt = "(%s) " % (self.__class__.__name__)
 
     def do_exit(self, args):
         return True
