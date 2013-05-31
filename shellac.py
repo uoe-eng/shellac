@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-from __future__ import print_function
 from cmd import Cmd
 import readline
 import inspect
@@ -50,8 +49,8 @@ class Shellac(Cmd, object):
 
     def do_help(self, args):
         """Help system documentation!"""
-        print(self._get_help(args, self) or
-              "*** No help for %s" % (args or repr(self)))
+        self.stdout.write((self._get_help(args, self) or
+              "*** No help for %s" % (args or repr(self))) + "\n")
 
     @classmethod
     def _get_help(cls, args, root):
