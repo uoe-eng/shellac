@@ -12,7 +12,7 @@ def generator(func):
         if state == 0:
             self.iterable = iter(func(self, text))
         try:
-            return self.iterable.next()
+            return next(self.iterable)
         except StopIteration:
             self.iterable = None
             return None
