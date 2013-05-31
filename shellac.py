@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from cmd import Cmd
+import sys
 import readline
 import inspect
 from functools import wraps
@@ -36,11 +36,31 @@ def complete_list(names, token):
     return (x + ' ' for x in names if x.startswith(token))
 
 
-class Shellac(Cmd, object):
+class Shellac(object):
 
-    def __init__(self):
-        super(Shellac, self).__init__()
+    def __init__(self, completekey='tab', stdin=sys.stdin, stdout=sys.stdout):
+        self.stdin = stdin
+        self.stdout = stdout
+        self.completekey = completekey
         self.prompt = "(%s) " % (self.__class__.__name__)
+        self.lastcmd = ''
+        self.intro = None
+        self.cmdqueue = []
+        # raw_input() replaced with input() in python 3
+        try:
+            self.inp = raw_input
+        except NameError:
+            self.inp = input
+
+    def emptyline(self):
+        """This method can be overridden to change what happens
+           when an empty line is entered"""
+        return
+
+    def default(self, line):
+        """Default action for commands with no do_ method"""
+
+        self.stdout.write('*** Unknown syntax: %s\n' % (line))
 
     def do_exit(self, args):
         return True
@@ -71,6 +91,47 @@ class Shellac(Cmd, object):
             return None
         else:
             return func(args)
+
+    def precmd(self, line):
+        """Hook method executed just before the command line is dispatched."""
+        return line
+
+    def postcmd(self, stop, line):
+        """Hook method executed just after a command dispatch is finished."""
+        return stop
+
+    def preloop(self):
+        """Hook method executed once when the cmdloop() method is called."""
+        pass
+
+    def postloop(self):
+        """Hook method executed once when the cmdloop() method is finished."""
+        pass
+
+    def cmdloop(self):
+        self.preloop()
+        self.old_completer = readline.get_completer()
+        readline.set_completer(self.complete)
+        readline.parse_and_bind(self.completekey + ": complete")
+
+        try:
+            if self.intro:
+                self.stdout.write(str(self.intro) + "\n")
+            stop = None
+            while not stop:
+                if self.cmdqueue:
+                    line = self.cmdqueue.pop()
+                else:
+                    try:
+                        line = self.inp(self.prompt)
+                    except EOFError:
+                        line = 'EOF'
+                line = self.precmd(line)
+                stop = self.onecmd(line)
+                stop = self.postcmd(stop, line)
+            self.postloop()
+        finally:
+            readline.set_completer(self.old_completer)
 
     def onecmd(self, line, args='', root=None):
         if not args:
