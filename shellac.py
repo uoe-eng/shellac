@@ -28,8 +28,8 @@ def completer(func):
     return inner_completer
 
 
-def members(obj):
-    return (f[0][3:] for f in inspect.getmembers(obj) if f[0].startswith('do_'))
+def members(obj, prefix='do_'):
+    return (f[0][len(prefix):] for f in inspect.getmembers(obj) if f[0].startswith(prefix))
 
 
 def complete_list(names, token):
@@ -170,7 +170,7 @@ class Shellac(object):
         elif len(tokens) == 0:
             return members(tree)
         if len(tokens) == 1:
-            return complete_list(members(tree), tokens[0])
+            return complete_list(set(members(tree, 'help_')) | set(members(tree)), tokens[0])
         elif tokens[0] in members(tree):
             return cls._traverse_help(tokens[1:],
                                       getattr(tree, 'do_' + tokens[0]))
