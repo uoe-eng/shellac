@@ -19,6 +19,13 @@ def generator(func):
     return new_func
 
 
+class CompletionError(Exception):
+    """Errors in completion functions."""
+
+    def __init__(self, args="Error during completion."):
+        Exception.__init__(self, args)
+
+
 def completer(func):
     def inner_completer(obj):
         if not hasattr(obj, "completions"):
@@ -199,7 +206,17 @@ class Shellac(object):
         tokens = buf[:endidx].split()
         if not tokens or buf[endidx - 1] == ' ':
             tokens.append('')
-        if tokens[0] == "help":
-            return self._traverse_help(tokens[1:], self)
-        else:
-            return self._traverse_do(tokens, self)
+        try:
+            if tokens[0] == "help":
+                return self._traverse_help(tokens[1:], self)
+            else:
+                return self._traverse_do(tokens, self)
+        except CompletionError as e:
+            sys.stdout.write("\n%s\n" % msg)
+            self.redraw()
+            return None
+
+    def redraw(self):
+        sys.stdout.write("%s%s" % (self.prompt,
+                                   readline.get_line_buffer()))
+        readline.redisplay()
