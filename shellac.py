@@ -9,16 +9,21 @@ from functools import wraps
 def generator(func):
     @wraps(func)
     def new_func(self, text, state):
-        if state == 0:
-            self.iterable = iter(func(self, text))
         try:
-            return next(self.iterable)
+            if state == 0:
+                self.iterable = iter(func(self, text))
+            try:
+                return next(self.iterable)
+            except StopIteration:
+                self.iterable = None
+                return None
         except CompletionError as e:
+            # CompletionError exceptions can be thrown by generators when next()
+            # is called, or by simple functions (i.e. those returning a list) at
+            # the point of call (i.e. before iter() is applied). Catch both
+            # cases.
             sys.stdout.write("\n%s\n" % str(e))
             self.redraw()
-            return None
-        except StopIteration:
-            self.iterable = None
             return None
     return new_func
 
