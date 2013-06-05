@@ -13,6 +13,10 @@ def generator(func):
             self.iterable = iter(func(self, text))
         try:
             return next(self.iterable)
+        except CompletionError as e:
+            sys.stdout.write("\n%s\n" % str(e))
+            self.redraw()
+            return None
         except StopIteration:
             self.iterable = None
             return None
@@ -206,15 +210,10 @@ class Shellac(object):
         tokens = buf[:endidx].split()
         if not tokens or buf[endidx - 1] == ' ':
             tokens.append('')
-        try:
-            if tokens[0] == "help":
-                return self._traverse_help(tokens[1:], self)
-            else:
-                return self._traverse_do(tokens, self)
-        except CompletionError as e:
-            sys.stdout.write("\n%s\n" % str(e))
-            self.redraw()
-            return None
+        if tokens[0] == "help":
+            return self._traverse_help(tokens[1:], self)
+        else:
+            return self._traverse_do(tokens, self)
 
     def redraw(self):
         sys.stdout.write("%s%s" % (self.prompt,
