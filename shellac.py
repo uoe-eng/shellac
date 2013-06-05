@@ -212,7 +212,7 @@ class Shellac(object):
             else:
                 return self._traverse_do(tokens, self)
         except CompletionError as e:
-            sys.stdout.write("\n%s\n" % msg)
+            sys.stdout.write("\n%s\n" % str(e))
             self.redraw()
             return None
 
