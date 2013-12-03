@@ -58,7 +58,10 @@ class Shellac(object):
         self.stdin = stdin
         self.stdout = stdout
         self.completekey = completekey
-        self.prompt = "(%s) " % (self.__class__.__name__)
+        if sys.stdin.isatty():
+            self.prompt = "(%s) " % (self.__class__.__name__)
+        else:
+            self.prompt = ""
         self.lastcmd = ''
         self.intro = None
         self.cmdqueue = []
