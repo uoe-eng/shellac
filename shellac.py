@@ -198,6 +198,8 @@ class Shellac(object):
     # traverse_do is recursive so needs to find itself through the class
     @classmethod
     def _traverse_do(cls, tokens, tree):
+        if inspect.isclass(tree):
+            tree = tree()
         if tree is None:
             return []
         elif len(tokens) == 0:
