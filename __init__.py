@@ -129,7 +129,7 @@ class Shellac(object):
 
     def cmdloop(self):
         self.preloop()
-        self.old_completer = readline.get_completer()
+        old_completer = readline.get_completer()
         readline.set_completer(self.complete)
         readline.parse_and_bind(self.completekey + ": complete")
 
@@ -150,7 +150,7 @@ class Shellac(object):
                 stop = self.postcmd(stop, line)
             self.postloop()
         finally:
-            readline.set_completer(self.old_completer)
+            readline.set_completer(old_completer)
 
     def onecmd(self, line, args='', root=None):
         if not args:
