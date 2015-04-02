@@ -208,9 +208,11 @@ class Shellac(object):
             if hasattr(tree, 'completions'):
                 return (c for f in tree.completions for c in f(tokens[0]))
             return complete_list(members(tree), tokens[0])
-        elif tokens[0] in members(tree):
+        if tokens[0] in members(tree):
             return cls._traverse_do(tokens[1:],
                                     getattr(tree, 'do_' + tokens[0]))
+        if hasattr(tree, 'completions'):
+            return (c for f in tree.completions for c in f(tokens[-1]))
         return []
 
     @generator
