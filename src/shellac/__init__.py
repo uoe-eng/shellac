@@ -7,8 +7,13 @@ from functools import wraps
 
 
 def generator(func):
+    """Turn an iterable function into a readline-style completion function which
+    accepts an integer "state" as its last argument.
+
+    """
     @wraps(func)
     def new_func(self, text, state):
+        """A wrapper for this function."""
         try:
             if state == 0:
                 self.iterable = iter(func(self, text))
@@ -36,7 +41,12 @@ class CompletionError(Exception):
 
 
 def completer(func):
+    """Attach a completion function to the decorated function."""
+
     def inner_completer(obj):
+        """The inner decorator which takes the completion function as its only
+        argument."""
+
         if not hasattr(obj, "completions"):
             obj.completions = []
         obj.completions.append(func)
@@ -45,16 +55,32 @@ def completer(func):
 
 
 def members(obj, prefix='do_'):
+    """Return a list of members of the given class which start with a given
+    prefix."""
+
     return (f[0][len(prefix):] for f in inspect.getmembers(obj) if f[0].startswith(prefix))
 
 
 def complete_list(names, token):
+    """Filter given list which starts with the given string, and pad with a
+    trailing space."""
+
     return (x + ' ' for x in names if x.startswith(token))
 
 
 class Shellac(object):
+    """An interactive command interpreter."""
 
     def __init__(self, completekey='tab', stdin=sys.stdin, stdout=sys.stdout):
+        """Create a command interpreter.
+
+        You should never call this class directly. To use it, inherit from this
+        class and implement do_*() methods which map to * commands. Implement
+        child methods of classes defined in your subclass to create subcommands
+        in the interface.
+
+        """
+
         self.stdin = stdin
         self.stdout = stdout
         self.completekey = completekey
@@ -73,26 +99,37 @@ class Shellac(object):
 
     def emptyline(self):
         """This method can be overridden to change what happens
-           when an empty line is entered"""
+           when an empty line is entered."""
+
         return
 
     def default(self, line):
-        """Default action for commands with no do_ method"""
+        """Default action for commands with no do_ method."""
 
-        self.stdout.write('*** Unknown syntax: %s\n' % (line))
+        self.stdout.write('*** Unknown syntax: {0}\n'.format(line))
 
     def do_exit(self, args):
+        """Exit the interactive interpreter."""
+
         return True
 
     do_EOF = do_exit
 
     def do_help(self, args):
         """Help system documentation!"""
+
         self.stdout.write((self._get_help(args, self) or
-              "*** No help for %s" % (args or repr(self))) + "\n")
+                           "*** No help for %s" % (args or repr(self))) + "\n")
 
     @classmethod
     def _get_help(cls, args, root):
+        """Recursive class method to find a help string for the given command.
+
+        Returns either a string from the result of a help_*() or do_*()
+        function, the do_*() function's docstring or None.
+
+        """
+
         cmd, _, args = args.partition(' ')
         if not cmd:
             return root.__doc__
@@ -113,17 +150,37 @@ class Shellac(object):
 
     def postcmd(self, stop, line):
         """Hook method executed just after a command dispatch is finished."""
+
         return stop
 
     def preloop(self):
         """Hook method executed once when the cmdloop() method is called."""
+
         pass
 
     def postloop(self):
         """Hook method executed once when the cmdloop() method is finished."""
+
         pass
 
     def cmdloop(self):
+        """Implement an interactive command interpreter which grabs a line of
+        input and passes it to onecmd() until the postcmd() function returns
+        True.
+
+        This method will also:
+        - Execute a preloop() method before starting the interpreter,
+        - Install a complete() readline completer function, and
+        - Write the string intro followed by a newline to stdout, then
+            - Read from a list of commands called cmdqueue, or
+            - Read from stdin, and
+                - Call precmd() with the line as an argument,
+                - Call onecmd() with the line as an argument,
+                - Call postcmd() with the stop flag and the line as an argument.
+        - Finally, restore the previous readline completer, if any.
+
+        """
+
         self.preloop()
         old_completer = readline.get_completer()
         readline.set_completer(self.complete)
@@ -149,6 +206,15 @@ class Shellac(object):
             readline.set_completer(old_completer)
 
     def onecmd(self, line, args='', root=None):
+        """Execute a single command line.
+
+        If the given line is False (i.e. empty), call return the result of
+        emptyline(). Thereafter, try to find a chain of do_*() methods and
+        classes which ends with a callable, then return the result of calling
+        it.
+
+        """
+
         if not args:
             args = line
         if not root:
@@ -180,6 +246,9 @@ class Shellac(object):
     # traverse_help is recursive so needs to find itself through the class
     @classmethod
     def _traverse_help(cls, tokens, tree):
+        """Recurse through the class tree of do_*() methods and classes to find
+        a help_*() method which can be used to provide help."""
+
         if tree is None:
             return []
         elif len(tokens) == 0:
@@ -194,6 +263,10 @@ class Shellac(object):
     # traverse_do is recursive so needs to find itself through the class
     @classmethod
     def _traverse_do(cls, tokens, tree):
+        """Traverse through the class tree of do_*() methods to find a do_*()
+        method whose completions function is called to give a list of possible
+        arguments or subcommands."""
+
         if inspect.isclass(tree):
             tree = tree()
         if tree is None:
@@ -213,6 +286,11 @@ class Shellac(object):
 
     @generator
     def complete(self, text):
+        """Return a list of possible completions from the line currently entered
+        at the prompt. If the first word is "help", try to find a help_*()
+        method through _traverse_do, otherwise look for a command through
+        _traverse_do()."""
+
         endidx = readline.get_endidx()
         buf = readline.get_line_buffer()
         tokens = buf[:endidx].split()
@@ -224,6 +302,8 @@ class Shellac(object):
             return self._traverse_do(tokens, self)
 
     def redraw(self):
+        """Refresh the current input line."""
+
         sys.stdout.write("%s%s" % (self.prompt,
                                    readline.get_line_buffer()))
         readline.redisplay()
