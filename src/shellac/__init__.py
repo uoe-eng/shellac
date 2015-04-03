@@ -58,7 +58,7 @@ class Shellac(object):
         self.stdin = stdin
         self.stdout = stdout
         self.completekey = completekey
-        if sys.stdin.isatty():
+        if self.stdin.isatty():
             self.prompt = "(%s) " % (self.__class__.__name__)
         else:
             self.prompt = ""
