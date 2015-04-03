@@ -17,12 +17,12 @@ def generator(func):
             except StopIteration:
                 self.iterable = None
                 return None
-        except CompletionError as e:
+        except CompletionError as exc:
             # CompletionError exceptions can be thrown by generators when next()
             # is called, or by simple functions (i.e. those returning a list) at
             # the point of call (i.e. before iter() is applied). Catch both
             # cases.
-            sys.stdout.write("\n%s\n" % str(e))
+            sys.stdout.write("\n%s\n" % str(exc))
             self.redraw()
             return None
     return new_func
