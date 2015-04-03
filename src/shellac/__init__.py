@@ -102,11 +102,8 @@ class Shellac(object):
             func = getattr(root, 'help_' + cmd)
         except AttributeError:
             if hasattr(root, 'do_' + cmd):
-                res = cls._get_help(args, getattr(root, 'do_' + cmd))
-                if res:
-                    return res
-                else:
-                    return getattr(root, 'do_' + cmd).__doc__
+                return cls._get_help(args, getattr(root, 'do_' + cmd)) or \
+                       getattr(root, 'do_' + cmd).__doc__
         else:
             return func(args)
 
