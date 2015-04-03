@@ -98,16 +98,15 @@ class Shellac(object):
             return root.__doc__
         if inspect.isclass(root):
             root = root()
-        if hasattr(root, 'do_' + cmd):
-            res = cls._get_help(args, getattr(root, 'do_' + cmd))
-            if res:
-                return res
         try:
             func = getattr(root, 'help_' + cmd)
         except AttributeError:
             if hasattr(root, 'do_' + cmd):
-                return getattr(root, 'do_' + cmd).__doc__
-            return None
+                res = cls._get_help(args, getattr(root, 'do_' + cmd))
+                if res:
+                    return res
+                else:
+                    return getattr(root, 'do_' + cmd).__doc__
         else:
             return func(args)
 
