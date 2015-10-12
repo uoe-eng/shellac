@@ -1,58 +1,126 @@
 #!/usr/bin/python
 import shellac
 import sys
+import time
 
 
-def complete_charlie_one(token):
-    return shellac.complete_list(['ant', 'bee'], token)
+class UserGroupTool(shellac.Shellac):
+    """This is a tool which pretends to modify users and groups.
+
+This help is actually the class docstring.
+
+Press <TAB> (or type 'help <TAB>') to see what you can do..."""
+
+    @staticmethod
+    def help_user(args):
+        """Help for the user command.
+
+        You can use a help_ method if you want to do something
+        fancier than can be displayed in a docstring"""
+
+        return "'help user' command run at {h}:{m}".format(
+            h=time.localtime()[3],
+            m=time.localtime()[4])
 
 
-def complete_charlie_two(token):
-    return shellac.complete_list(['cat', 'dog'], token)
+    class do_user():
+        """Docstring explaining do_user."
+
+        This will not be displayed as help,
+        since there is a help_user method above."""
+
+        @staticmethod
+        def list_users(token):
+            return shellac.complete_list(myData.users.keys(), token)
+
+        @staticmethod
+        def do_list(args):
+            """Print a list of all users."""
+            print(sorted(myData.users.keys()))
+
+        @staticmethod
+        def do_add(args):
+            """Add a new user."""
+            myData.users[args] = ''
+            print("Added user: " + args)
+
+        @staticmethod
+        @shellac.completer(list_users)
+        def do_remove(args):
+            """Remove a user."""
+            try:
+                del myData.users[args.strip()]
+                print("Removed user: " + args)
+            except KeyError:
+                print("No such user to remove.")
 
 
-class myShellac(shellac.Shellac):
-    """Documentation about myShellac"""
+    class do_group():
+        """This command works with groups.
 
-    def help_alpha(self, args):
-        return "help_alpha " + args
+This help is actually the docstring for the do_group class, which is displayed
+since there is no help_group method in the parent class."""
 
-    def help_banana(self, args):
-        return "Platano"
+        @staticmethod
+        def list_groups(token):
+            # Long-hand for shellac.complete_list
+            return [x + ' ' for x in myData.groups.keys() if x.startswith(token)]
 
-    class do_alpha():
-        """alpha docstring"""
-        class do_bravo():
-            """bravo docstring"""
+        @staticmethod
+        def do_list(args):
+            """Print a list of all groups."""
 
-            def help_charlie(self, args):
-                return "help_charlie " + args
+            print(sorted(myData.groups.keys()))
 
-            @shellac.completer(complete_charlie_one)
-            @shellac.completer(complete_charlie_two)
-            def do_charlie(self, args):
-                print(("Charlie says " + args))
+        @staticmethod
+        def do_add(args):
+            myData.groups[args] = ''
+            print("Added group: " + args)
 
-    class do_delta():
-        """delta docstring"""
+        @staticmethod
+        @shellac.completer(list_groups)
+        def do_remove(args):
+            try:
+                del myData.groups[args.strip()]
+                print("Removed group: " + args)
+            except KeyError:
+                print("No such group to remove.")
 
-        completions = [
-            lambda x: [y + ' ' for y in ['right', 'wrong'] if y.startswith(x)]]
+        class do_member():
+            """Modify group membership.
 
-        def help_run(self, args):
-            return "help_run " + args
+            Note: this method's sub-commands don't actually do anything."""
 
-        def do_run(self, args):
-            """run docstring"""
+            @staticmethod
+            def do_list(args):
+                print("Group membership not implemented!" + args)
 
-            print("delta ran")
+            @staticmethod
+            def do_add(args):
+                print("Added member: " + args)
 
-        def do_stop(self, args):
+            @staticmethod
+            def do_remove(args):
+                print("Removed member: " + args)
 
-            print("delta stop")
+
+class myData(object):
+    """A simple data source."""
+
+    users = {'alice': '',
+             'anne': '',
+             'bob': '',
+             'bruce': '',
+             'cliff': '',
+             'clive': ''}
+
+    groups = {'staff': '',
+              'students': '',
+              'visitors': ''}
+
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        myShellac().onecmd(' '.join(sys.argv[1:]))
+        UserGroupTool().onecmd(' '.join(sys.argv[1:]))
     else:
-        myShellac().cmdloop()
+        UserGroupTool().cmdloop()
