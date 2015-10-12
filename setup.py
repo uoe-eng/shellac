@@ -17,6 +17,12 @@ pkg_author = 'Matthew Richardson, Bruce Duncan'
 # pip format: 'foo', 'foo==1.2', 'foo>=1.2' etc
 install_requires = []
 
+# Neither OSX nor Windows ship with GNU readline
+if sys.platform == 'darwin':
+    install_requires.append('gnureadline')
+elif sys.platform.startswith('win'):
+    install_requires.append('pyreadline>=2.0')
+
 # Do not edit below this line! #
 
 build_dir = "build/"
