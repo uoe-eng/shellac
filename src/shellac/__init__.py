@@ -272,7 +272,11 @@ class Shellac(object):
         try:
             return func(*args, **kwargs)
         except TypeError:
-            return func.__func__(*args, **kwargs)
+            try:
+                return func.__func__(*args, **kwargs)
+            except AttributeError:
+                # py2.6 doesn't have __func__ for staticmethods
+                return func.__get__(True)(*args, **kwargs)
 
     # traverse_do is recursive so needs to find itself through the class
     @classmethod
