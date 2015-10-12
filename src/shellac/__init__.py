@@ -260,6 +260,20 @@ class Shellac(object):
                                       getattr(tree, 'do_' + tokens[0]))
         return []
 
+    @staticmethod
+    def call_static(func, *args, **kwargs):
+        """Call a method defined using @staticmethod.
+
+        Because we want to define completion functions in their associated class
+        and we want them to be static methods we cannot call them directly. Make
+        sure a callable object is called.
+        """
+
+        try:
+            return func(*args, **kwargs)
+        except TypeError:
+            return func.__func__(*args, **kwargs)
+
     # traverse_do is recursive so needs to find itself through the class
     @classmethod
     def _traverse_do(cls, tokens, tree):
@@ -275,13 +289,13 @@ class Shellac(object):
             return members(tree)
         if len(tokens) == 1:
             if hasattr(tree, 'completions'):
-                return (c for f in tree.completions for c in f(tokens[0]))
+                return (c for f in tree.completions for c in cls.call_static(f, tokens[0]))
             return complete_list(members(tree), tokens[0])
         if tokens[0] in members(tree):
             return cls._traverse_do(tokens[1:],
                                     getattr(tree, 'do_' + tokens[0]))
         if hasattr(tree, 'completions'):
-            return (c for f in tree.completions for c in f(tokens[-1]))
+            return (c for f in tree.completions for c in cls.call_static(f, tokens[-1]))
         return []
 
     @generator
