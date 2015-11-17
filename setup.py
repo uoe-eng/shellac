@@ -21,7 +21,7 @@ pkg_classifiers = [
             'Programming Language :: Python :: 3',
             ]
 
-install_requires = []
+install_requires = ['rl']
 
 # Neither OSX nor Windows ship with GNU readline
 if sys.platform == 'darwin':

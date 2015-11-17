@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 import sys
-import readline
+import rl.readline as readline
 import inspect
 from functools import wraps
 
@@ -63,10 +63,9 @@ def members(obj, prefix='do_'):
 
 
 def complete_list(names, token):
-    """Filter given list which starts with the given string, and pad with a
-    trailing space."""
+    """Filter given list which starts with the given string."""
 
-    return (x + ' ' for x in names if x.startswith(token))
+    return (x for x in names if x.startswith(token))
 
 
 class Shellac(object):
@@ -337,4 +336,10 @@ class Shellac(object):
 
         sys.stdout.write("%s%s" % (self.prompt,
                                    readline.get_line_buffer()))
+        readline.redisplay()
+
+    def clear(self):
+        """Clear the input and display a new prompt."""
+
+        readline.replace_line("%s ^C\n" % (readline.get_line_buffer()))
         readline.redisplay()
