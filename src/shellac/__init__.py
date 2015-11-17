@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-from __future__ import print_function
 import sys
 import rl.readline as readline
 import inspect
@@ -202,7 +201,7 @@ class Shellac(object):
                     try:
                         line = self.inp(self.prompt)
                     except EOFError:
-                        print()
+                        sys.stdout.write("\n")
                         line = 'EOF'
                     except KeyboardInterrupt as exc:
                         self.ctrl_c(exc)
