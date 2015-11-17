@@ -204,8 +204,9 @@ class Shellac(object):
                     except EOFError:
                         print()
                         line = 'EOF'
-                    except KeyboardInterrupt:
-                        print()
+                    except KeyboardInterrupt as exc:
+                        self.ctrl_c(exc)
+                        self.clear()
                         continue
                 try:
                     line = self.precmd(line)
@@ -213,6 +214,7 @@ class Shellac(object):
                     stop = self.postcmd(stop, line)
                 except KeyboardInterrupt as exc:
                     self.ctrl_c(exc)
+                    self.clear()
             self.postloop()
         finally:
             readline.set_completer(old_completer)
