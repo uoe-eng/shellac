@@ -206,7 +206,7 @@ class Shellac(object):
                         line = 'EOF'
                     except KeyboardInterrupt as exc:
                         self.ctrl_c(exc)
-                        self.clear()
+                        self.redraw()
                         continue
                 try:
                     line = self.precmd(line)
@@ -214,7 +214,7 @@ class Shellac(object):
                     stop = self.postcmd(stop, line)
                 except KeyboardInterrupt as exc:
                     self.ctrl_c(exc)
-                    self.clear()
+                    self.redraw()
             self.postloop()
         finally:
             readline.set_completer(old_completer)
@@ -333,15 +333,12 @@ class Shellac(object):
         else:
             return self._traverse_do(tokens, self)
 
-    def redraw(self):
-        """Refresh the current input line."""
+    def redraw(self, prompt=False):
+        """Update the input.
 
-        sys.stdout.write("%s%s" % (self.prompt,
-                                   readline.get_line_buffer()))
-        readline.redisplay()
+        prompt: Force a redraw of the prompt & line."""
 
-    def clear(self):
-        """Clear the input and display a new prompt."""
-
-        readline.replace_line("%s ^C\n" % (readline.get_line_buffer()))
-        readline.redisplay()
+        sys.stdout.write(str(" ^C") + "\n")
+        readline.replace_line("")
+        if prompt:
+            readline.redisplay(True)
