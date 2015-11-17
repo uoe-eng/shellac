@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+from __future__ import print_function
 import sys
 import readline
 import inspect
@@ -163,6 +164,11 @@ class Shellac(object):
 
         pass
 
+    def ctrl_c(self, exc):
+        """Hook method called when Ctrl-C is pressed during execution of loop body."""
+
+        pass
+
     def cmdloop(self):
         """Implement an interactive command interpreter which grabs a line of
         input and passes it to onecmd() until the postcmd() function returns
@@ -197,10 +203,17 @@ class Shellac(object):
                     try:
                         line = self.inp(self.prompt)
                     except EOFError:
+                        print()
                         line = 'EOF'
-                line = self.precmd(line)
-                stop = self.onecmd(line)
-                stop = self.postcmd(stop, line)
+                    except KeyboardInterrupt:
+                        print()
+                        continue
+                try:
+                    line = self.precmd(line)
+                    stop = self.onecmd(line)
+                    stop = self.postcmd(stop, line)
+                except KeyboardInterrupt as exc:
+                    self.ctrl_c(exc)
             self.postloop()
         finally:
             readline.set_completer(old_completer)
