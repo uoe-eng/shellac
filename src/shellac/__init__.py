@@ -28,7 +28,7 @@ def generator(func):
             # the point of call (i.e. before iter() is applied). Catch both
             # cases.
             sys.stdout.write("\n%s\n" % str(exc))
-            self.redraw()
+            self.cancel()
             return None
     return new_func
 
@@ -205,7 +205,7 @@ class Shellac(object):
                         line = 'EOF'
                     except KeyboardInterrupt as exc:
                         self.ctrl_c(exc)
-                        self.redraw()
+                        self.cancel()
                         continue
                 try:
                     line = self.precmd(line)
@@ -213,7 +213,7 @@ class Shellac(object):
                     stop = self.postcmd(stop, line)
                 except KeyboardInterrupt as exc:
                     self.ctrl_c(exc)
-                    self.redraw()
+                    self.cancel()
             self.postloop()
         finally:
             readline.set_completer(old_completer)
@@ -332,8 +332,8 @@ class Shellac(object):
         else:
             return self._traverse_do(tokens, self)
 
-    def redraw(self, prompt=False):
-        """Update the input.
+    def cancel(self, prompt=False):
+        """Update the input to indicate a 'cancel'.
 
         prompt: Force a redraw of the prompt & line."""
 
