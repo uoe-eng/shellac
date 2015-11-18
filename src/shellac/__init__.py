@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+import rl
 import rl.readline as readline
 import inspect
 from functools import wraps
@@ -61,9 +62,10 @@ def members(obj, prefix='do_'):
     return (f[0][len(prefix):] for f in inspect.getmembers(obj) if f[0].startswith(prefix))
 
 
-def complete_list(names, token):
+def complete_list(names, token, append_character=" "):
     """Filter given list which starts with the given string."""
 
+    rl.completion.append_character = append_character
     return (x for x in names if x.startswith(token))
 
 
