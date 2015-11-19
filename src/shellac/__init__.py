@@ -1,4 +1,10 @@
 #!/usr/bin/python
+"""
+Shellac
+=======
+
+shellac is an alternative to the standard python library `cmd <http://docs.python.org/2/library/cmd.html>`_ which aims to offer an alternative approach to nesting commands.
+"""
 
 import sys
 import rl
@@ -10,8 +16,8 @@ from functools import wraps
 def generator(func):
     """Turn an iterable function into a readline-style completion function which
     accepts an integer "state" as its last argument.
-
     """
+
     @wraps(func)
     def new_func(self, text, state):
         """A wrapper for this function."""
@@ -35,7 +41,11 @@ def generator(func):
 
 
 class CompletionError(Exception):
-    """Errors in completion functions."""
+    """Errors in completion functions.
+
+    :type args: string
+    :param args: message to display
+    """
 
     def __init__(self, args="Error during completion."):
         Exception.__init__(self, args)
@@ -57,30 +67,59 @@ def completer(func):
 
 def members(obj, prefix='do_'):
     """Return a list of members of the given class which start with a given
-    prefix."""
+    prefix.
+
+    :type obj: class
+    :param obj: Class to inspoect for members of a given prefix.
+
+    :type prefix: string
+    :param prefix: The prefix which members of the given class must start with.
+
+    :return: list
+    """
 
     return (f[0][len(prefix):] for f in inspect.getmembers(obj) if f[0].startswith(prefix))
 
 
 def complete_list(names, token, append_character=" "):
-    """Filter given list which starts with the given string."""
+    """Filter given list which starts with the given string.
+
+    :type names: list
+    :param names: list to filter
+
+    :type token: string
+    :param token: 'startswith' filter token
+
+    :type append_character: string
+    :param append_character: completion character to append (see rl.completion.append_character)
+
+    :return: generator
+    """
 
     rl.completion.append_character = append_character
     return (x for x in names if x.startswith(token))
 
 
 class Shellac(object):
-    """An interactive command interpreter."""
+    """An interactive command interpreter.
+    You should never call this class directly. To use it, inherit from this
+    class and implement do_*() methods which map to * commands. Implement
+    child methods of classes defined in your subclass to create subcommands
+    in the interface.
+
+    :type completekey: *readline* name of a comlpetion key.
+    :param completekey: Key to execute completion
+
+    :type stdin: File-like object
+    :param stdin: Override stdin (defaults to *sys.stdin*)
+
+    :type stdout: File-like object
+    :param stdout: Override stdout (defaults to *sys.stdout*)
+    """
 
     def __init__(self, completekey='tab', stdin=sys.stdin, stdout=sys.stdout):
-        """Create a command interpreter.
+        """Create a command interpreter."""
 
-        You should never call this class directly. To use it, inherit from this
-        class and implement do_*() methods which map to * commands. Implement
-        child methods of classes defined in your subclass to create subcommands
-        in the interface.
-
-        """
 
         self.stdin = stdin
         self.stdout = stdout
@@ -99,13 +138,18 @@ class Shellac(object):
             self.inp = input
 
     def emptyline(self):
-        """This method can be overridden to change what happens
-           when an empty line is entered."""
+        """Method to specify what happens when an empty line is entered.
+
+        *Can be overridden*.
+        """
 
         return
 
     def default(self, line):
-        """Default action for commands with no do_ method."""
+        """Default action for commands with no do_ method.
+
+        *Can be overridden*.
+        """
 
         self.stdout.write('*** Unknown syntax: {0}\n'.format(line))
 
@@ -117,7 +161,7 @@ class Shellac(object):
     do_EOF = do_exit
 
     def do_help(self, args):
-        """Help system documentation!"""
+        """Help on help"""
 
         self.stdout.write((self._get_help(args, self) or
                            "*** No help for %s" % (args or repr(self))) + "\n")
@@ -128,7 +172,6 @@ class Shellac(object):
 
         Returns either a string from the result of a help_*() or do_*()
         function, the do_*() function's docstring or None.
-
         """
 
         cmd, _, args = args.partition(' ')
@@ -146,26 +189,49 @@ class Shellac(object):
             return func(args)
 
     def precmd(self, line):
-        """Hook method executed just before the command line is dispatched."""
+        """Hook method executed just before the command line is dispatched.
+
+        *Can be overridden*.
+        """
         return line
 
     def postcmd(self, stop, line):
-        """Hook method executed just after a command dispatch is finished."""
+        """Hook method executed just after a command dispatch is finished.
+
+        *Can be overridden*.
+
+        :type stop: None or True
+        :param stop: flag passed in from onecmd() which is usually returned
+
+        :type line: string
+        :param line: line executed by onecmd
+
+        :return: Return True (stop) to cause oneloop() to break
+        """
 
         return stop
 
     def preloop(self):
-        """Hook method executed once when the cmdloop() method is called."""
+        """Hook method executed once when the cmdloop() method is called.
+
+        *Can be overridden*.
+        """
 
         pass
 
     def postloop(self):
-        """Hook method executed once when the cmdloop() method is finished."""
+        """Hook method executed once when the cmdloop() method is finished.
+
+        *Can be overridden*
+        """
 
         pass
 
     def ctrl_c(self, exc):
-        """Hook method called when Ctrl-C is pressed during execution of loop body."""
+        """Hook method called when Ctrl-C is pressed during execution of loop body.
+
+        *Can be overridden*.
+        """
 
         pass
 
@@ -175,16 +241,16 @@ class Shellac(object):
         True.
 
         This method will also:
-        - Execute a preloop() method before starting the interpreter,
-        - Install a complete() readline completer function, and
-        - Write the string intro followed by a newline to stdout, then
-            - Read from a list of commands called cmdqueue, or
-            - Read from stdin, and
-                - Call precmd() with the line as an argument,
-                - Call onecmd() with the line as an argument,
-                - Call postcmd() with the stop flag and the line as an argument.
-        - Finally, restore the previous readline completer, if any.
 
+        * Execute a preloop() method before starting the interpreter
+        * Install a complete() readline completer function
+        * Write the string intro followed by a newline to stdout
+            * Read from a list of commands called cmdqueue, or
+            * Read from stdin, and
+                * Call precmd() with the line as an argument,
+                * Call onecmd() with the line as an argument,
+                * Call postcmd() with the stop flag and the line as an argument.
+        * Finally, restore the previous readline completer, if any.
         """
 
         self.preloop()
@@ -228,6 +294,14 @@ class Shellac(object):
         classes which ends with a callable, then return the result of calling
         it.
 
+        :type line: string
+        :param line: line to be executed
+
+        :type args: string
+        :param args: used to store 'current' part of line during recursion
+
+        :type root: object
+        :param root: 'current' 'do_' class or method during recursion
         """
 
         if not args:
@@ -262,7 +336,14 @@ class Shellac(object):
     @classmethod
     def _traverse_help(cls, tokens, tree):
         """Recurse through the class tree of do_*() methods and classes to find
-        a help_*() method which can be used to provide help."""
+        a help_*() method which can be used to provide help.
+
+        :type tokens: list
+        :param tokens: tokens from executed 'help' command.
+
+        :type tree: object
+        :param tree: 'current' class or method during recursion
+        """
 
         if tree is None:
             return []
@@ -298,7 +379,14 @@ class Shellac(object):
     def _traverse_do(cls, tokens, tree):
         """Traverse through the class tree of do_*() methods to find a do_*()
         method whose completions function is called to give a list of possible
-        arguments or subcommands."""
+        arguments or subcommands.
+
+        :type tokens: list
+        :param tokens: tokens from executed 'help' command.
+
+        :type tree: object
+        :param tree: 'current' class or method during recursion
+        """
 
         if inspect.isclass(tree):
             tree = tree()
@@ -322,7 +410,13 @@ class Shellac(object):
         """Return a list of possible completions from the line currently entered
         at the prompt. If the first word is "help", try to find a help_*()
         method through _traverse_do, otherwise look for a command through
-        _traverse_do()."""
+        _traverse_do().
+
+        :type text: string
+        :param text: line entered at prompt
+
+        :return: list
+        """
 
         endidx = readline.get_endidx()
         buf = readline.get_line_buffer()
@@ -335,9 +429,11 @@ class Shellac(object):
             return self._traverse_do(tokens, self)
 
     def cancel(self, prompt=False):
-        """Update the input to indicate a 'cancel'.
+        """Update the shell to indicate a 'cancel'.
 
-        prompt: Force a redraw of the prompt & line."""
+        :type prompt: boolean
+        :param prompt: If True, force a redraw of the prompt & line.
+        """
 
         self.stdout.write(str(" ^C") + "\n")
         readline.replace_line("")
