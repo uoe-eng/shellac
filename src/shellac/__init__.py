@@ -203,7 +203,7 @@ class Shellac(object):
                     try:
                         line = self.inp(self.prompt)
                     except EOFError:
-                        sys.stdout.write("\n")
+                        self.stdout.write("\n")
                         line = 'EOF'
                     except KeyboardInterrupt as exc:
                         self.ctrl_c(exc)
@@ -339,7 +339,7 @@ class Shellac(object):
 
         prompt: Force a redraw of the prompt & line."""
 
-        sys.stdout.write(str(" ^C") + "\n")
+        self.stdout.write(str(" ^C") + "\n")
         readline.replace_line("")
         if prompt:
             readline.redisplay(True)
