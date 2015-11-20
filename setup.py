@@ -83,6 +83,7 @@ def main():
         include_package_data=True,
         package_data = {'': ['LICENSE', 'RELEASE-VERSION']},
         install_requires=install_requires,
+        test_suite="{0}.{1}".format(pkg_name, "tests"),
         )
 
 

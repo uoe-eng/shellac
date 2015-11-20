@@ -1,7 +1,67 @@
 #!/usr/bin/python
+
+"""Test suite for shellac.
+
+If this script is executed, it will run a simple User & Group tool demo.
+"""
+
+from unittest import TestCase
+import rl
 import shellac
 import sys
 import time
+
+class ShellacTests(TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_shellac_complete_list(self):
+        self.assertEqual(list(shellac.complete_list(["bat", "bird", "cat"],
+                                                    "b")),
+                         ["bat", "bird"])
+
+
+
+class UserGroupToolTests(TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_help_user(self):
+        self.assertIs(type(UserGroupTool().help_user("")), str)
+
+    def test_do_user_list_users(self):
+        # Test list_users returns an appropriate list
+        self.assertEqual(list(UserGroupTool()
+                           .do_user()
+                           .list_users("a")), ["alice", "anne"])
+
+    def test_do_user_do_add(self):
+        # Check that a user is added
+        UserGroupTool().do_user().do_add("zebedee")
+        self.assertEqual(next(UserGroupTool()
+                           .do_user()
+                           .list_users("zebedee")), "zebedee")
+
+    def test_do_user_do_remove(self):
+        # Check that a user is removed
+        UserGroupTool().do_user().do_remove("zebedee")
+        self.assertEqual(list(UserGroupTool()
+                           .do_user()
+                           .list_users("zebedee")), [])
+
+    def test_do_user_do_remove_exc(self):
+        # Check that a user is removed
+        self.assertFalse(UserGroupTool()
+                         .do_user()
+                         .do_remove("nosuchuser"))
+
+    def test_do_group_list_groups(self):
+        # Test list_users returns an appropriate list
+        self.assertEqual(list(UserGroupTool()
+                              .do_group()
+                              .list_groups("s")), ["staff", "students"])
 
 
 class UserGroupTool(shellac.Shellac):
@@ -32,7 +92,6 @@ Press <TAB> (or type 'help <TAB>') to see what you can do..."""
         @staticmethod
         def list_users(token):
             return shellac.complete_list(myData.users.keys(), token)
-
         @staticmethod
         def do_list(args):
             """Print a list of all users."""
@@ -51,9 +110,10 @@ Press <TAB> (or type 'help <TAB>') to see what you can do..."""
             try:
                 del myData.users[args.strip()]
                 print("Removed user: " + args)
+                return True
             except KeyError:
                 print("No such user to remove.")
-
+                return False
 
     class do_group():
         """This command works with groups.
@@ -64,7 +124,7 @@ since there is no help_group method in the parent class."""
         @staticmethod
         def list_groups(token):
             # Long-hand for shellac.complete_list
-            return [x + ' ' for x in myData.groups.keys() if x.startswith(token)]
+            return sorted([x for x in myData.groups.keys() if x.startswith(token)])
 
         @staticmethod
         def do_list(args):
@@ -83,8 +143,10 @@ since there is no help_group method in the parent class."""
             try:
                 del myData.groups[args.strip()]
                 print("Removed group: " + args)
+                return True
             except KeyError:
                 print("No such group to remove.")
+                return False
 
         class do_member():
             """Modify group membership.
@@ -102,6 +164,7 @@ since there is no help_group method in the parent class."""
             @staticmethod
             def do_remove(args):
                 print("Removed member: " + args)
+                return True
 
 
 class myData(object):
@@ -120,6 +183,7 @@ class myData(object):
 
 
 if __name__ == '__main__':
+    # If run, launch usergrouptool command shell as a demo
     if len(sys.argv) > 1:
         UserGroupTool().onecmd(' '.join(sys.argv[1:]))
     else:
