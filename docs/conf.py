@@ -26,7 +26,7 @@ class Mock(MagicMock):
 
 # Mock out the install of rl, since this requires C-libs that may not
 # be compileable when sphinx runs.
-MOCK_MODULES = ['rl']
+MOCK_MODULES = ['rl', 'rl.readline']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # If extensions (or modules to document with autodoc) are in another directory,
