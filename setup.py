@@ -34,7 +34,7 @@ def call_git_describe():
     try:
         p = subprocess.Popen(['git', 'describe'],
                              stdout=subprocess.PIPE)
-        return p.communicate()[0].split('\n')[0].strip()
+        return p.communicate()[0].decode().strip()
     except Exception:
         return None
 
