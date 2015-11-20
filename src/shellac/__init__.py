@@ -13,44 +13,6 @@ import inspect
 from functools import wraps
 
 
-def generator(func):
-    """Turn an iterable function into a readline-style completion function which
-    accepts an integer "state" as its last argument.
-    """
-
-    @wraps(func)
-    def new_func(self, text, state):
-        """A wrapper for this function."""
-        try:
-            if state == 0:
-                self.iterable = iter(func(self, text))
-            try:
-                return next(self.iterable)
-            except StopIteration:
-                self.iterable = None
-                return None
-        except CompletionError as exc:
-            # CompletionError exceptions can be thrown by generators when next()
-            # is called, or by simple functions (i.e. those returning a list) at
-            # the point of call (i.e. before iter() is applied). Catch both
-            # cases.
-            sys.stdout.write("\n%s\n" % str(exc))
-            self.cancel()
-            return None
-    return new_func
-
-
-class CompletionError(Exception):
-    """Errors in completion functions.
-
-    :type args: string
-    :param args: message to display
-    """
-
-    def __init__(self, args="Error during completion."):
-        Exception.__init__(self, args)
-
-
 def completer(func):
     """Attach a completion function to the decorated function."""
 
@@ -405,7 +367,7 @@ class Shellac(object):
             return (c for f in tree.completions for c in cls.call_static(f, tokens[-1]))
         return []
 
-    @generator
+    @rl.generator
     def complete(self, text):
         """Return a list of possible completions from the line currently entered
         at the prompt. If the first word is "help", try to find a help_*()
