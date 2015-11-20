@@ -14,6 +14,17 @@
 
 import sys
 import os
+from unittest.mock import MagicMock
+
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+            return Mock()
+
+# Mock out the install of rl, since this requires C-libs that may not
+# be compileable when sphinx runs.
+MOCK_MODULES = ['rl']
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
