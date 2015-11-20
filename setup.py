@@ -15,7 +15,7 @@ pkg_author = 'Matthew Richardson, Bruce Duncan'
 pkg_author_email = 'm.richardson@ed.ac.uk'
 
 pkg_classifiers = [
-            'Development Status :: 4 - Beta',
+            'Development Status :: 5 - Production/Stable',
             'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
             'Programming Language :: Python :: 2.6',
             'Programming Language :: Python :: 3',
