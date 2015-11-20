@@ -1,0 +1,3 @@
+rl
+pyreadline >=2.0; sys_.platform == 'win32'
+gnureadline; sys_platform == 'darwin'
