@@ -271,7 +271,8 @@ class Shellac(object):
         if not root:
             root = self
         if args:
-            child, _, args = args.partition(' ')
+            # Collapse multiple spaces to a single space, then partition
+            child, _, args = ' '.join(args.split()).partition(' ')
         elif not line:
             return self.emptyline()
         self.lastcmd = line
