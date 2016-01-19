@@ -136,7 +136,7 @@ class Shellac(object):
         function, the do_*() function's docstring or None.
         """
 
-        cmd, _, args = args.partition(' ')
+        cmd, args = args.split(None, 1)
         if not cmd:
             return root.__doc__
         if inspect.isclass(root):
@@ -271,8 +271,7 @@ class Shellac(object):
         if not root:
             root = self
         if args:
-            # Collapse multiple spaces to a single space, then partition
-            child, _, args = ' '.join(args.split()).partition(' ')
+            child, args = args.split(None, 1)
         elif not line:
             return self.emptyline()
         self.lastcmd = line
