@@ -136,7 +136,11 @@ class Shellac(object):
         function, the do_*() function's docstring or None.
         """
 
-        cmd, args = args.split(None, 1)
+        try:
+            cmd, args = args.split(None, 1)
+        except ValueError:
+            cmd = args
+            args = ''
         if not cmd:
             return root.__doc__
         if inspect.isclass(root):
@@ -271,7 +275,11 @@ class Shellac(object):
         if not root:
             root = self
         if args:
-            child, args = args.split(None, 1)
+            try:
+                child, args = args.split(None, 1)
+            except ValueError:
+                child = args
+                args = ''
         elif not line:
             return self.emptyline()
         self.lastcmd = line
