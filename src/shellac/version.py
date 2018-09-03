@@ -26,9 +26,9 @@ def get_version():
     project_dir = dirname(__file__)
     pkg_file = join(project_dir, '../../PKG-INFO')
 
-    if isdir(join(project_dir, '../.git')):
+    if isdir(join(project_dir, '../../.git')):
         # Get the version using "git describe".
-        cmd = 'git -C %s describe --tags --match %s[0-9]* --dirty' % (project_dir, prefix)
+        cmd = 'git describe --tags --match %s[0-9]* --dirty' % (prefix)
         try:
             version = check_output(cmd.split()).decode().strip()[len(prefix):]
         except CalledProcessError:
