@@ -24,7 +24,7 @@ def get_version():
         return version.group(1)
 
     project_dir = dirname(__file__)
-    pkg_file = join(project_dir, '../PKG-INFO')
+    pkg_file = join(project_dir, '../../PKG-INFO')
 
     if isdir(join(project_dir, '../.git')):
         # Get the version using "git describe".
