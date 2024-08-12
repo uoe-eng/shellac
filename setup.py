@@ -35,6 +35,7 @@ def main():
         url=pkg_url,
         license=pkg_license,
         description=pkg_description,
+        long_description=pkg_description,
 	    classifiers=pkg_classifiers,
         author=pkg_author,
         author_email=pkg_author_email,
